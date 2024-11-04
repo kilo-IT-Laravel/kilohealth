@@ -20,11 +20,4 @@ build:
   script:
     # Build the Docker image using the Dockerfile in the root directory
     - docker build -t "$IMAGE_NAME" .
-
-push:
-  stage: push
-  script:
-    # Push the Docker image to the GitLab Container Registry
     - docker push "$IMAGE_NAME"
-  only:
-    - main  # Only run this job on the main branch
