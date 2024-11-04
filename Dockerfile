@@ -1,63 +1,50 @@
-FROM php:8.2-fpm
+# Use the official PHP 8.2 image with Apache
+FROM php:8.2-apache
 
-# Install system dependencies and clean up in one step
+# Set the working directory in the container
+WORKDIR /var/www
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
     zip \
     unzip \
-    default-mysql-client \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    libonig-dev \
+    libxml2-dev \
+    npm
 
-# Install PCNTL extension separately first
-RUN docker-php-ext-install pcntl
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 
-# Then install other PHP extensions
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mysqli \
-    mbstring \
-    exif \
-    bcmath \
-    gd
-
-# Install Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get update \
-    && apt-get install -y nodejs \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Get Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
-# Copy only necessary files first
-COPY composer.* ./
-COPY package*.json ./
+# Copy existing application directory contents to the container
+COPY . /var/www
 
-# Install dependencies
-RUN composer install --no-scripts --no-autoloader
-RUN npm install
+# Change ownership of Laravel folder
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage \
+    && chmod -R 755 /var/www/bootstrap/cache
 
-# Copy the rest of the application
-COPY . .
+# Install Laravel dependencies
+RUN composer install --optimize-autoloader --no-dev
 
-# Final steps
-RUN composer dump-autoload --optimize \
-    && npm run build \
-    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN cp .env.example .env
+RUN php artisan key:generate
 
-COPY start.sh /usr/local/bin/start.sh
+# Install npm dependencies for Vue.js
+RUN npm install && npm run build
 
-RUN chmod +x /usr/local/bin/start.sh
+RUN cp ./000-default.conf /etc/apache2/sites-available/000-default.conf
 
-EXPOSE 8000
+# Expose port 80
+EXPOSE 80
 
-CMD ["/usr/local/bin/start.sh"]
+# Start Apache in foreground mode (so it doesn't exit)
+CMD ["apache2-foreground"]
