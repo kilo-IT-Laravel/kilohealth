@@ -5,10 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: laravel_app
     environment:
-      DB_HOST: kiloblog
+      DB_HOST: host.docker.internal
       DB_USERNAME: root
       DB_PASSWORD:
-      DB_DATABASE: kilohealth
+      DB_DATABASE: kilohealth2
       DB_PORT: 3306
     command: >
       sh -c "php artisan migrate && php artisan db:seed"

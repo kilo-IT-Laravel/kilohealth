@@ -48,7 +48,7 @@ class TopicController extends Controller
         try {
             $validatedData = $this->req->validate([
                 'name' => 'required|max:255',
-                'categorie_id' => 'required|exists:categories,id',
+                'category_id' => 'required|exists:categories,id',
             ]);
 
             $topic = $this->Repository->createTopic($validatedData);

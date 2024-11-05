@@ -17,8 +17,9 @@ class gen_user_roleandper extends Seeder
      */
     public function run(): void
     {
-        Role::query()->delete();
-        Permission::query()->delete();
+        User::query()->forceDelete(); 
+        Role::query()->forceDelete();
+        Permission::query()->forceDelete();
 
         foreach (Role::allRoles() as $roleName) {
             Role::firstOrCreate(['name' => $roleName]);
