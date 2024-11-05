@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: laravel_app
     environment:
-      DB_HOST: mysql
+      DB_HOST: kiloblog
       DB_USERNAME: root
       DB_PASSWORD:
       DB_DATABASE: kilohealth
