@@ -15,7 +15,7 @@ class topicSeeder extends Seeder
     public function run(): void
     {
         categorie::all()->each(function ($category) {
-            ModelsTopic::factory()->count(5)->create(['category_id' => $category->id]);
+            ModelsTopic::factory()->count(5)->create(['categorie_id' => $category->id]);
         });
     }
 }

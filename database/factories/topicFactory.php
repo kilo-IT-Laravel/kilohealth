@@ -20,9 +20,12 @@ class topicFactory extends Factory
 
     public function definition(): array
     {
+
+        $cateogry = categorie::factory()->create();
+
         return [
             'name' => fake()->unique()->words(3, true),
-            'category_id' => categorie::factory(),
+            'categorie_id' => $cateogry->id,
         ];
     }
 }

@@ -10,7 +10,7 @@ class topic extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['category_id', 'name'];
+    protected $fillable = ['categorie_id', 'name'];
 
     public function categorie()
     {
