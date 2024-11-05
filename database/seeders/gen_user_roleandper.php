@@ -21,12 +21,12 @@ class gen_user_roleandper extends Seeder
         Permission::query()->delete();
 
         foreach (Role::allRoles() as $roleName) {
-            Role::create(['name' => $roleName]);
+            Role::firstOrCreate(['name' => $roleName]);
         }
         $this->command->info('Roles created successfully.');
 
         foreach (Permission::defaultPermissions() as $permissionName) {
-            Permission::create(['name' => $permissionName]);
+            Permission::firstOrCreate(['name' => $permissionName]);
         }
         $this->command->info('Permissions created successfully.');
 
