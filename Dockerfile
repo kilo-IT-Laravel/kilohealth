@@ -27,15 +27,15 @@ RUN a2enmod rewrite
 # Copy existing application directory contents to the container
 COPY . /var/www
 
+RUN cp .env.example .env
+
 # Change ownership of Laravel folder
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \
     && chmod -R 755 /var/www/bootstrap/cache
 
 # Install Laravel dependencies
-RUN composer install --optimize-autoloader --no-dev
-
-RUN cp .env.example .env
+RUN composer install
 RUN php artisan key:generate
 
 # Install npm dependencies for Vue.js
