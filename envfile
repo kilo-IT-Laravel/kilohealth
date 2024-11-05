@@ -19,4 +19,6 @@ REVERB_APP_KEY=2nyirauysk6qjdddyg3w
 REVERB_APP_SECRET=gf46puubvmzowazdpoim
 REVERB_HOST="localhost"
 REVERB_PORT=8081
-REVERB_SCHEME=http
+REVERB_SCHEME=http 
+
+.
