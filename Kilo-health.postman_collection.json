@@ -1418,13 +1418,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/categories?page=1",
+									"raw": "{{url}}/api/categorie?page=1",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories"
+										"categorie"
 									],
 									"query": [
 										{
@@ -1510,13 +1510,13 @@
 									]
 								},
 								"url": {
-									"raw": "{{url}}/api/categories",
+									"raw": "{{url}}/api/categorie",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories"
+										"categorie"
 									]
 								}
 							},
@@ -1538,13 +1538,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/categories/1",
+									"raw": "{{url}}/api/categorie/1",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories",
+										"categorie",
 										"1"
 									]
 								}
@@ -1588,13 +1588,13 @@
 									]
 								},
 								"url": {
-									"raw": "{{url}}/api/categories/12?_method=PUT",
+									"raw": "{{url}}/api/categorie/12?_method=PUT",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories",
+										"categorie",
 										"12"
 									],
 									"query": [
@@ -1623,13 +1623,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/categories/slug/ai-hoshino",
+									"raw": "{{url}}/api/categorie/slug/ai-hoshino",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories",
+										"categorie",
 										"slug",
 										"ai-hoshino"
 									]
@@ -1653,13 +1653,13 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/categories/3",
+									"raw": "{{url}}/api/categorie/3",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories",
+										"categorie",
 										"3"
 									]
 								}
@@ -1682,13 +1682,13 @@
 								"method": "POST",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/categories/{id}/restore",
+									"raw": "{{url}}/api/categorie/{id}/restore",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories",
+										"categorie",
 										"{id}",
 										"restore"
 									]
@@ -1712,13 +1712,13 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/categories/11/force",
+									"raw": "{{url}}/api/categorie/11/force",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"categories",
+										"categorie",
 										"11",
 										"force"
 									]
@@ -1747,13 +1747,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/topics",
+									"raw": "{{url}}/api/topic",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics"
+										"topic"
 									]
 								}
 							},
@@ -1795,13 +1795,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/api/topics",
+									"raw": "{{url}}/api/topic",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics"
+										"topic"
 									]
 								}
 							},
@@ -1843,13 +1843,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/api/topics/2",
+									"raw": "{{url}}/api/topic/2",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics",
+										"topic",
 										"2"
 									]
 								}
@@ -1872,13 +1872,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/topics/1",
+									"raw": "{{url}}/api/topic/1",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics",
+										"topic",
 										"1"
 									]
 								}
@@ -1901,13 +1901,13 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/topics/2",
+									"raw": "{{url}}/api/topic/2",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics",
+										"topic",
 										"2"
 									]
 								}
@@ -1930,13 +1930,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/topics/trashed",
+									"raw": "{{url}}/api/topic/trashed",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics",
+										"topic",
 										"trashed"
 									]
 								}
@@ -1959,13 +1959,13 @@
 								"method": "POST",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/topics/{id}/restore",
+									"raw": "{{url}}/api/topic/{id}/restore",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics",
+										"topic",
 										"{id}",
 										"restore"
 									]
@@ -1989,13 +1989,13 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/api/topics/{id}/force",
+									"raw": "{{url}}/api/topic/{id}/force",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"api",
-										"topics",
+										"topic",
 										"{id}",
 										"force"
 									]
@@ -3288,7 +3288,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\":\"renko1\",\r\n  \"email\":\"renko1@gmail.com\",\r\n  \"password\":\"renko123\",\r\n  \"password_confirmation\":\"renko123\"\r\n}"
+							"raw": "{\r\n  \"name\":\"renko2\",\r\n  \"email\":\"renko2@gmail.com\",\r\n  \"password\":\"renko123\",\r\n  \"password_confirmation\":\"renko123\"\r\n}"
 						},
 						"url": {
 							"raw": "{{url}}/api/register",
@@ -3331,7 +3331,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"email\":\"renko1@gmail.com\",\r\n  \"password\":\"renko123\"\r\n}",
+							"raw": "{\r\n  \"email\":\"renko1@gmail.com\",\r\n  \"password\":\"abc12356\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3653,7 +3653,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"otp\":\"323907\",\r\n    \"password\":\"abc12356\",\r\n    \"password_confirmation\":\"abc12356\"\r\n}",
+							"raw": "{\r\n    \"otp\":\"260770\",\r\n    \"password\":\"abc12356\",\r\n    \"password_confirmation\":\"abc12356\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
