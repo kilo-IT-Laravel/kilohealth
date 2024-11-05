@@ -13,6 +13,8 @@ class categorieSeeder extends Seeder
      */
     public function run(): void
     {
+        Categorie::withTrashed()->forceDelete();
+
         categorie::factory()->count(10)->create();
     }
 }
