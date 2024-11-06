@@ -1,6 +1,0 @@
-///
-- register and login verification system
-
-test laravel resource
-
-test api
