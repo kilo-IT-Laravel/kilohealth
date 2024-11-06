@@ -5,13 +5,21 @@ services:
       dockerfile: Dockerfile
     container_name: laravel_app
     environment:
-      DB_HOST: kiloblog
+      DB_HOST: host.docker.internal
       DB_USERNAME: root
       DB_PASSWORD:
-      DB_DATABASE: kilohealth2
+      DB_DATABASE: kilohealth3
       DB_PORT: 3306
-    command: >
-      sh -c "php artisan migrate && php artisan db:seed"
+    entrypoint: |
+      sh -c "
+        php artisan migrate --force &&
+        if [ \"$(php artisan db:seed --force --no-interaction || echo 'seeded')\" != 'seeded' ]; then
+          echo 'Database already seeded. Skipping.'; 
+        else 
+          php artisan db:seed --force; 
+        fi &&
+        exec apache2-foreground
+      "
     volumes:
       - .:/var/www
       - /var/www/vendor/
@@ -22,6 +30,7 @@ services:
       - app_network
     depends_on:
       - mysql
+    restart: unless-stopped
 
   mysql:
     image: mysql:8.0
@@ -29,7 +38,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: kilohealth2
+      MYSQL_DATABASE: kilohealth3
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
