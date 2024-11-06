@@ -19,6 +19,7 @@ services:
       - app_network
     depends_on:
       - mysql
+    restart: unless-stopped
 
   nginx:
     image: nginx:stable-perl
@@ -48,3 +49,4 @@ volumes:
 
 networks:
   app_network:
+
