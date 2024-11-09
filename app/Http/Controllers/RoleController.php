@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Resources\roles;
 use App\pagination\paginating;
 use App\Repositories\Roles\RoleInterface;
+use App\Traits\ValidationErrorFormatter;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class RoleController extends Controller
 {
+    use ValidationErrorFormatter;
+
     private Request $req;
 
     protected $Repository;
@@ -32,12 +36,12 @@ class RoleController extends Controller
             $roles = $this->Repository->getRoles($search, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully retrieving roles data',
+                'message' => 'Successfully',
                 'data' => roles::collection($roles),
                 'meta' => $this->pagination->metadata($roles)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -45,11 +49,11 @@ class RoleController extends Controller
     {
         try {
             $role = $this->Repository->getRoleById($id);
-            return response()->json(['success' => true, 'message' => 'Successfully retrieving role', 'data' => $role], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'data' => $role], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Role not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -60,9 +64,12 @@ class RoleController extends Controller
                 'name' => 'required|string|max:255',
             ]);
             $role = $this->Repository->createRole($validatedData);
-            return response()->json(['success' => true, 'message' => 'Successfully store role', 'data' => $role], 201);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'data' => $role], 201);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -73,11 +80,14 @@ class RoleController extends Controller
                 'name' => 'sometimes|string|max:255'
             ]);
             $this->Repository->updateRole($id, $validatedData);
-            return response()->json(['success' => true, 'message' => 'Successfully updated role'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Role not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error updating role', 'err' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -85,11 +95,11 @@ class RoleController extends Controller
     {
         try {
             $this->Repository->deleteRole($id);
-            return response()->json(['success' => true, 'message' => 'Successfully delete role'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Role not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -97,11 +107,11 @@ class RoleController extends Controller
     {
         try {
             $this->Repository->restoreRole($id);
-            return response()->json(['success' => true, 'message' => 'Successfully restore role data'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Role not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -109,11 +119,11 @@ class RoleController extends Controller
     {
         try {
             $this->Repository->forceDeleteRole($id);
-            return response()->json(['success' => true, 'message' => 'Successfully permenatly delete role data'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfuly'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Role not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -125,12 +135,12 @@ class RoleController extends Controller
             $trashedRoles = $this->Repository->getTrashedRoles($search, $perPage);
             return response()->json([
                 'success' => true, 
-                'message' => 'Successfuly retrieving soft delete roles', 
+                'message' => 'Successfuly', 
                 'data' => roles::collection($trashedRoles),
                 'meta'=> $this->pagination->metadata($trashedRoles)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 }

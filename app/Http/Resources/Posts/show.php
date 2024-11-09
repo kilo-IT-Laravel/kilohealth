@@ -21,7 +21,6 @@ class show extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'content' => $this->content,
             'rendered_content' => $this->rendered_content,
             'category_id' => $this->category_id,
             'category' => $this->whenLoaded('category', function () {
@@ -40,7 +39,7 @@ class show extends JsonResource
                     'id' => $this->author->id,
                     'name' => $this->author->name,
                     'email' => $this->author->email,
-                    'avatar' => $this->author->avatar ? $this->getThisUrl($this->author->avatar) : "https://pbs.twimg.com/media/Fl14K6KaAAQ_OgI?format=jpg&name=large",
+                    'avatar' => $this->author->avatar ? $this->getThisUrl($this->author->avatar) : "https://as2.ftcdn.net/v2/jpg/00/64/67/27/1000_F_64672736_U5kpdGs9keUll8CRQ3p3YaEv2M6qkVY5.jpg",
                 ];
             }),
             'thumbnail' => $this->getThisUrl($this->thumbnail),

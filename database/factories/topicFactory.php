@@ -20,7 +20,6 @@ class topicFactory extends Factory
 
     public function definition(): array
     {
-
         $cateogry = categorie::factory()->create();
 
         return [

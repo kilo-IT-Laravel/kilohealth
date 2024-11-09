@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 interface SiteSettingInterface
 {
-    public function getAllSettings(string $search = null , int $perPage = 10): LengthAwarePaginator;
+    public function getAllSettings(string $search = null , string $key = null , int $perPage = 10): LengthAwarePaginator;
     public function getSetting(string $key): ?site_setting;
     public function updateSetting(string $key, Request $req): bool;
     public function createSetting(Request $req): site_setting;

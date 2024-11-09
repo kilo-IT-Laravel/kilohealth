@@ -10,6 +10,7 @@ use App\Services\AuditLogService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class TopicController implements TopicInterface
         }
     }
 
-    public function getPopularTopics(int $perPage = 10, int $days = 30): LengthAwarePaginator
+    public function getPopularTopics(int $perPage = 10, int $days = 30): Collection
     {
         try {
             return topic::select([
@@ -63,7 +64,7 @@ class TopicController implements TopicInterface
                 ->groupBy('topics.id', 'topics.name', 'categories.name', 'categories.slug', 'categories.icon')
                 ->havingRaw('COUNT(DISTINCT posts.id) > 0')
                 ->orderByDesc('posts_count')
-                ->paginate($perPage);
+                ->take($perPage)->get();
         } catch (Exception $e) {
             Log::error('Database error: ' . $e->getMessage());
             throw new Exception('Error retrieving topics');

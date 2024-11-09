@@ -7,13 +7,17 @@ use App\Http\Resources\uploadMedia\posts_mediaId;
 use App\Http\Resources\uploadMedia\show;
 use App\pagination\paginating;
 use App\Repositories\UploadMedias\UploadMediaInterface;
+use App\Traits\ValidationErrorFormatter;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class UploadMediaController extends Controller
 {
+    use ValidationErrorFormatter;
+
     private Request $req;
 
     protected $Repository;
@@ -34,12 +38,12 @@ class UploadMediaController extends Controller
             $medias = $this->Repository->getMedias($search, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully get media',
+                'message' => 'Successfully',
                 'data' => index::collection($medias),
                 'meta' => $this->pagination->metadata($medias)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -51,9 +55,12 @@ class UploadMediaController extends Controller
             ]);
 
             $media = $this->Repository->uploadMedia($this->req);
-            return response()->json(['success' => true, 'message' => 'Successfully uploaded', 'media' => $media], 201);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'data' => $media], 201);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -72,11 +79,11 @@ class UploadMediaController extends Controller
         try {
             $deleted = $this->Repository->deleteMedia($id);
             if ($deleted) {
-                return response()->json(['success' => true, 'message' => 'Media deleted successfully'], 200);
+                return response()->json(['success' => true, 'message' => 'Successfully'], 200);
             }
-            return response()->json(['success' => false, 'message' => 'Failed to delete media'], 400);
+            return response()->json(['success' => false, 'message' => 'Media not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -87,15 +94,15 @@ class UploadMediaController extends Controller
             if ($media) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Successfully get media',
+                    'message' => 'Successfully',
                     'data' => new show($media)
                 ], 200);
             }
             return response()->json(['success' => false, 'message' => 'Media not found'], 404);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Media not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -107,14 +114,14 @@ class UploadMediaController extends Controller
             $post = $this->Repository->displayPostByMediaId($id, $search, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully retrieved post',
+                'message' => 'Successfully',
                 'data' => posts_mediaId::collection($post),
                 'meta' => $this->pagination->metadata($post)
             ]);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Media not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -126,12 +133,12 @@ class UploadMediaController extends Controller
             $medias = $this->Repository->getTrashed($search, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully get trashed media',
+                'message' => 'Successfully',
                 'data' => index::collection($medias),
                 'meta' => $this->pagination->metadata($medias)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -139,10 +146,11 @@ class UploadMediaController extends Controller
     {
         try {
             $this->Repository->restore($id);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Media not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -152,12 +160,12 @@ class UploadMediaController extends Controller
             $this->Repository->forceDelete($id);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully force deleted media',
-            ], 204);
+                'message' => 'Successfully',
+            ], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Media not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 }

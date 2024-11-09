@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             gen_user_roleandper::class, // php artisan db:seed --class=gen_user_roleandper
             categorieSeeder::class, // php artisan db:seed --class=categorieSeeder
             topicSeeder::class, // php artisan db:seed --class=topicSeeder
+            
         ]);
     }
 }

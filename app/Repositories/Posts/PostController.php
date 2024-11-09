@@ -156,7 +156,7 @@ class PostController implements PostInterface
         }
     }
 
-    public function getPostByIdForPublic(int $id, int $userId): ?array /// for public use
+    public function getPostByIdForPublic(int $id, ?int $userId): ?array /// for public use
     {
         try {
             return DB::transaction(function () use ($id, $userId) {
@@ -186,7 +186,7 @@ class PostController implements PostInterface
                     return $this->handleAuthenticatedView($post, $userId);
                 }
                 
-                return $this->handleGuestView($post);
+                return $this->handleGuestView($post); 
             });
         } catch (ModelNotFoundException $e) {
             Log::error('Post not found: ' . $e->getMessage());
@@ -557,8 +557,7 @@ class PostController implements PostInterface
     private function handleGuestView(Post $post): array
     {
         $post->increment('views');
-        
-        $this->logGuestView($post);
+    
         event(new PostViewed($post, 0));
 
         return [
@@ -593,21 +592,6 @@ class PostController implements PostInterface
                 'post_id' => $post->id,
                 'user_id' => $userId,
                 'viewed_at' => now(),
-            ])
-        );
-    }
-
-    private function logGuestView(Post $post): void
-    {
-        $this->logService->log(
-            null,
-            'recorded_guest_post_view',
-            Post::class,
-            $post->id,
-            json_encode([
-                'post_id' => $post->id,
-                'viewed_at' => now(),
-                'ip' => request()->ip(),
             ])
         );
     }

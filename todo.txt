@@ -1,0 +1,5 @@
+test api
+
+test params and make sure params working
+
+fix email make sure it can use in public too for easy to frontend

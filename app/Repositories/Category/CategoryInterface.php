@@ -14,7 +14,7 @@ interface CategoryInterface
     public function createCategory(Request $req): categorie;
     public function updateCategory(int $id, Request $req): bool;
     public function getCategoryBySlug(string $slug): ?categorie;
-    public function getPopularCategory(): Collection;
+    public function getPopularCategory(int $limit = 10): Collection;
     public function deleteCategory(int $id): bool;
     public function restoreCategory(int $id): bool;
     public function forceDeleteCategory(int $id): bool;

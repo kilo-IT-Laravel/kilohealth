@@ -4,8 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Notifications\PasswordResetNotification;
-use App\Notifications\VerifyEmailNotification;
+use App\Traits\HasOTP;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes , HasOTP;
 
     /**
      * The attributes that are mass assignable.
@@ -27,7 +26,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role_id',
-        'avatar'
+        'avatar',
+        'email_verified_at',
+        'otp',
+        'otp_expires_at'
     ];
 
     /**
@@ -36,8 +38,10 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $hidden = [
+        'email_verified_at',
         'password',
         'remember_token',
+        'otp'
     ];
 
     /**
@@ -50,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'otp_expires_at' => 'datetime'
         ];
     }
 
@@ -72,15 +77,5 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasPermission(string $permission): bool
     {
         return $this->role->permissions->contains('name', $permission);
-    }
-
-    public function sendPasswordResetNotification($token)
-    {
-        $this->notify(new PasswordResetNotification($token));
-    }
-
-    public function sendEmailVerificationNotification()
-    {
-        $this->notify(new VerifyEmailNotification());
     }
 }

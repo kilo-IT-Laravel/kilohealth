@@ -8,14 +8,18 @@ use App\Http\Resources\Topics\popularTopic;
 use App\Http\Resources\Topics\show;
 use App\pagination\paginating;
 use App\Repositories\Topics\TopicInterface;
+use App\Traits\ValidationErrorFormatter;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\ValidationException;
 
 class TopicController extends Controller
 {
+    use ValidationErrorFormatter;
+
     private Request $req;
 
     protected $Repository;
@@ -34,12 +38,12 @@ class TopicController extends Controller
             $topics = $this->Repository->getAllTopics();
             return response()->json([
                 'success' => true,
-                'message' => 'successfully retrieving topics data',
+                'message' => 'Successfully',
                 'data' => index::collection($topics),
                 'meta' => $this->pagination->metadata($topics)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -54,11 +58,14 @@ class TopicController extends Controller
             $topic = $this->Repository->createTopic($validatedData);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully store topic data',
+                'message' => 'Successfully',
                 'data' => $topic
             ], 201);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -68,29 +75,29 @@ class TopicController extends Controller
             $topic = $this->Repository->getTopicById($id);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully retrieved topic data',
+                'message' => 'Successfully',
                 'data' => new show($topic)
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['success' => false, 'message' => 'Topic not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error retrieving topic', 'err' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
     public function popularTopics(): JsonResponse
     {
+        $take = $this->req->toke ?? 10;
         try {
-            $topics = $this->Repository->getPopularTopics(10, 30);
+            $topics = $this->Repository->getPopularTopics($take, 30);
             return response()->json([
                 'success' => true,
                 'message' =>
-                'Successfully retrieved popular topics',
-                'data' => popularTopic::collection($topics),
-                'meta' => $this->pagination->metadata($topics)
+                'Successfully',
+                'data' => popularTopic::collection($topics)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -106,13 +113,16 @@ class TopicController extends Controller
             $topic = $this->Repository->getTopicById($id);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully updated topic data',
+                'message' => 'Successfully',
                 'data' => $topic
             ], 200);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully', 'errors' => $formattedErrors] , 422); 
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Topic not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -120,11 +130,11 @@ class TopicController extends Controller
     {
         try {
             $this->Repository->deleteTopic($id);
-            return response()->json(['success' => true, 'message' => 'successfully deleted topic data'], 204);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Topic not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -137,12 +147,12 @@ class TopicController extends Controller
             $topics = $this->Repository->getTopicsByCategory($search, $perPage, $categoryId);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully retrieving topics',
+                'message' => 'Successfully',
                 'data' => index::collection($topics),
                 'meta' => $this->pagination->metadata($topics)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -150,11 +160,11 @@ class TopicController extends Controller
     {
         try {
             $this->Repository->restoreTopic($id);
-            return response()->json(['success' => true, 'message' => 'Topic restored successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Topic not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -165,9 +175,9 @@ class TopicController extends Controller
             if (!$deleted) {
                 return response()->json(['success' => false, 'message' => 'Topic not found'], 404);
             }
-            return response()->json(['success' => true, 'message' => 'successfully permenantly deleted topic'], 204);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -179,12 +189,12 @@ class TopicController extends Controller
             $trashedCategories = $this->Repository->getTrashedTopics($search, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully retrieving soft deleted topic',
+                'message' => 'Successfully',
                 'data' => index::collection($trashedCategories),
                 'metadata' => $this->pagination->metadata($trashedCategories)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 }

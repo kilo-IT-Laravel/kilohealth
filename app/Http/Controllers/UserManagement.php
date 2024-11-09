@@ -10,13 +10,17 @@ use App\Models\Role;
 use App\Models\User;
 use App\pagination\paginating;
 use App\Repositories\User\UserInterface;
+use App\Traits\ValidationErrorFormatter;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class UserManagement extends Controller
 {
+    use ValidationErrorFormatter;
+
     private Request $req;
 
     protected $Repository;
@@ -37,12 +41,12 @@ class UserManagement extends Controller
             $users = $this->Repository->getUsers($search, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Users retrieved successfully',
+                'message' => 'Successfully',
                 'data' => anotheruser::collection($users),
                 'meta' => $this->pagination->metadata($users)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -53,11 +57,11 @@ class UserManagement extends Controller
             $user = $this->Repository->getDetails($user, true);
             return response()->json([
                 'success' => true,
-                'message' => 'Users retrieved successfully',
+                'message' => 'Successfully',
                 'users' => new UserResource($user)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -73,11 +77,14 @@ class UserManagement extends Controller
             $role = $this->Repository->updatePermissions($id, $this->req->permissions);
             return response()->json([
                 'success' => true,
-                'message' => 'Role permissions updated successfully',
+                'message' => 'Successfully',
                 'role' => $role,
             ], 200);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -94,11 +101,14 @@ class UserManagement extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'User role updated successfully',
+                'message' => 'Successfully',
                 'user' => $user,
             ], 200);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -106,9 +116,9 @@ class UserManagement extends Controller
     {
         try {
             $this->Repository->rollbackDelete($userId);
-            return response()->json(['success' => true, 'message' => 'User restored successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -116,11 +126,11 @@ class UserManagement extends Controller
     {
         try {
             $this->Repository->softDelete($userId);
-            return response()->json(['success' => true, 'message' => 'User soft deleted successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -132,12 +142,12 @@ class UserManagement extends Controller
             $data = $this->Repository->getTrash($search, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Soft deleted users retrieved successfully',
+                'message' => 'Successfully',
                 'data' => anotheruser::collection($data),
                 'meta' => $this->pagination->metadata($data)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -145,11 +155,11 @@ class UserManagement extends Controller
     {
         try {
             $this->Repository->restore($userId);
-            return response()->json(['success' => true, 'message' => 'User restored successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -157,11 +167,11 @@ class UserManagement extends Controller
     {
         try {
             $this->Repository->forceDelete($userId);
-            return response()->json(['success' => true, 'message' => 'User permanently deleted successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -172,12 +182,12 @@ class UserManagement extends Controller
             $users = $this->Repository->getAuditLogs($userId, $perPage);
             return response()->json([
                 'success' => true,
-                'message' => 'Auditlog retrieved successfully',
+                'message' => 'Successfully',
                 'data' => auditlog::collection($users),
                 'meta' => $this->pagination->metadata($users)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -191,11 +201,11 @@ class UserManagement extends Controller
                 'avatar' => 'sometimes|file|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
             $result = $this->Repository->adminUpdateUser($userId, $this->req);
-            return response()->json(['success' => true, 'message' => 'User update successfully', 'data' => $result], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'data' => $result], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 }

@@ -3,6 +3,8 @@
 use App\Events\testing;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Auth\authenticate;
+use App\Http\Controllers\Auth\passwordResetController;
+use App\Http\Controllers\Auth\verificationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PemrissionController;
 use App\Http\Controllers\PostController;
@@ -13,16 +15,16 @@ use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\UploadMediaController;
 use App\Http\Controllers\UserManagement;
-use App\Models\categorie;
-use App\TestMethod\SwitchMe;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [authenticate::class, 'register']);
 Route::post('/login', [authenticate::class, 'login']);
-Route::get('/allsettings', [SiteSettingController::class, 'homepageSettings']);
-
+Route::post('/verify-email', [verificationController::class, 'verifyEmail']);
+Route::post('/resend-verification-otp', [verificationController::class, 'resendVerificationOTP']);
+Route::post('/forgot-password', [passwordResetController::class, 'forgotPassword']);
+Route::post('/resend-reset-password-otp', [passwordResetController::class, 'resendResetPasswordOTP']);
+Route::post('/reset-password', [passwordResetController::class, 'resetPassword']);
 /*
 |--------------------------------------------------------------------------
 | Frontend Public Routes
@@ -34,22 +36,20 @@ Route::prefix('posts')->group(function () {
     // Public viewing routes - no auth required
     Route::get('/', [PostController::class, 'getPublished']);
     Route::get('/popular', [PostController::class, 'popularPosts']);
-    Route::get('/{id}', [PostController::class, 'publicShow']);
+    Route::get('/{postId}', [PostController::class, 'publicShow'])->middleware(['setUserId']);
     Route::get('/related/{postId}', [PostController::class, 'getRelatedPosts']);
     Route::get('/{postId}/view-count', [PostViewController::class, 'getViewCount']);
-    
+
     // Auth required actions
-    Route::post('/{postId}/view', [PostViewController::class, 'recordView'])->middleware(['auth:sanctum' , 'setUserId']);
     Route::post('/{id}/like', [PostController::class, 'toggleLikes'])->middleware('auth:sanctum');
-    
 });
 
 // Public Categories & Topics
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
+    Route::get('/popular', [CategoryController::class, 'getPopularCategory']);
     Route::get('/{id}', [CategoryController::class, 'show']);
     Route::get('/slug/{slug}', [CategoryController::class, 'showBySlug']);
-    Route::get('/popular', [CategoryController::class, 'getPopularCategory']);
 });
 
 Route::prefix('topics')->group(function () {
@@ -60,7 +60,7 @@ Route::prefix('topics')->group(function () {
 });
 
 // Public Settings
-Route::get('/allsettings', [SiteSettingController::class, 'homepageSettings']);
+Route::get('/all-settings', [SiteSettingController::class, 'homepageSettings']);
 Route::get('/setting/{key}', [SiteSettingController::class, 'homepageSetting']);
 
 /*
@@ -72,8 +72,7 @@ Route::get('/setting/{key}', [SiteSettingController::class, 'homepageSetting']);
 Route::middleware('auth:sanctum')->group(function () {
     // User Profile Routes
     Route::prefix('profile')->group(function () {
-        Route::get('/', [UserManagement::class, 'getUserDetails']);
-        Route::get('/user' , [authenticate::class , 'getUser']);
+        Route::get('/user', [authenticate::class, 'getUser']);
         Route::put('/update', [authenticate::class, 'UpdateUserInfo']);
         Route::put('/update-password', [authenticate::class, 'changePassword']);
         Route::post('/logout', [authenticate::class, 'logout']);
@@ -86,7 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->group(function () {    
+Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard Analytics
     Route::get('/dashboard', [AnalyticsController::class, 'getDashboardAnalytics'])
@@ -100,7 +99,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{userId}/soft-delete', [UserManagement::class, 'SoftDeleteUser'])->middleware(['role:super_admin', 'permission:delete_users']);
         Route::post('/{userId}/restore', [UserManagement::class, 'RestoreUser'])->middleware(['role:super_admin', 'permission:restore_users']);
         Route::delete('/{userId}/force-delete', [UserManagement::class, 'ForceDeleteUser'])->middleware(['role:super_admin', 'permission:force_delete_users']);
-        Route::put('/admin-update-user', [UserManagement::class , 'adminUpdateUser'])->middleware('role:super_admin|admin');
+        Route::put('/admin-update-user', [UserManagement::class, 'adminUpdateUser'])->middleware('role:super_admin|admin');
         Route::get('/auditlog/{userId}', [UserManagement::class, 'getAuditLog'])->middleware(['role:super_admin', 'permission:view_log']);
         Route::post('/{userId}/rollback-data', [UserManagement::class, 'rollbackDelete'])->middleware('role:super_admin');
     });
@@ -134,7 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Content Management Routes
 
     // Categories
-    Route::prefix('categories')->group(function () {
+    Route::prefix('categorie')->group(function () {
         Route::get('/trashed', [CategoryController::class, 'trashed'])->middleware(['role:super_admin|admin', 'permission:view_delete_items']);
         Route::get('/', [CategoryController::class, 'index'])->middleware('permission:view_items');
         Route::post('/', [CategoryController::class, 'store'])->middleware(['role:super_admin|admin|arthur', 'permission:create_items']);
@@ -147,7 +146,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Topics
-    Route::prefix('topics')->group(function () {
+    Route::prefix('topic')->group(function () {
         Route::get('/trashed', [TopicController::class, 'trashed'])->middleware(['role:super_admin|admin', 'permission:view_delete_items']);
         Route::get('/', [TopicController::class, 'index'])->middleware('permission:view_items');
         Route::post('/', [TopicController::class, 'store'])->middleware(['role:super_admin|admin|arthur', 'permission:create_items']);
@@ -175,7 +174,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Post Views
-    Route::prefix('post_views')->group(function () {
+    Route::prefix('post-views')->group(function () {
         Route::get('/posts/{postId}/views', [PostViewController::class, 'getViewsByPost'])->middleware(['role:super_admin|admin|arthur', 'permission:view_items']);
         Route::get('/users/{userId}/views', [PostViewController::class, 'getViewsByUser'])->middleware(['role:super_admin|admin', 'permission:view_users']);
         Route::get('/posts/{postId}/check-view', [PostViewController::class, 'checkUserViewedPost'])->middleware('permission:view_items');
@@ -183,7 +182,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Media Management
-    Route::prefix('upload_media')->group(function () {
+    Route::prefix('upload-media')->group(function () {
         Route::get('/', [UploadMediaController::class, 'index'])->middleware(['role:super_admin|admin', 'permission:view_items']);
         Route::get('/trashed', [UploadMediaController::class, 'trashed'])->middleware(['role:super_admin|admin', 'permission:view_delete_items']);
         Route::post('/', [UploadMediaController::class, 'upload'])->middleware(['role:super_admin|admin|arthur', 'permission:create_items']);
@@ -195,7 +194,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Post Photos
-    Route::prefix('post_photos')->group(function () {
+    Route::prefix('post-photos')->group(function () {
         Route::get('/trashed', [postPhotosController::class, 'trashed'])->middleware(['role:super_admin|admin', 'permission:view_delete_items']);
         Route::get('/{id}/photos', [postPhotosController::class, 'index'])->middleware('permission:view_items');
         Route::post('/{id}', [postPhotosController::class, 'store'])->middleware(['role:super_admin|admin', 'permission:create_items']);
@@ -206,7 +205,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}/force', [postPhotosController::class, 'forceDelete'])->middleware(['role:super_admin', 'permission:force_delete_items']);
     });
     // Site Settings
-    Route::prefix('site_settings')->group(function () {
+    Route::prefix('site-settings')->group(function () {
         Route::get('/', [SiteSettingController::class, 'index'])->middleware(['role:super_admin', 'permission:view_items']);
         Route::get('/{key}', [SiteSettingController::class, 'show'])->middleware(['role:super_admin', 'permission:view_items']);
         Route::put('/{key}', [SiteSettingController::class, 'update'])->middleware(['role:super_admin', 'permission:update_items']);
@@ -216,23 +215,23 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-Route::get('/testView', function () {
-    $test = new SwitchMe();
-    $result = $test->useSwitch('testMethod');
-    return response()->json([
-        'msg' => $result
-    ]);
-});
+// Route::get('/testView', function () {
+//     $test = new SwitchMe();
+//     $result = $test->useSwitch('testMethod');
+//     return response()->json([
+//         'msg' => $result
+//     ]);
+// });
 
 
 //////////////////reverb
-Route::post('/msg', function (Request $req) {
-    $bruh = $req->message;
-    event(new testing($bruh));
-    return response()->json([
-        'msg' => $bruh
-    ]);
-});
+// Route::post('/msg', function (Request $req) {
+//     $bruh = $req->message;
+//     event(new testing($bruh));
+//     return response()->json([
+//         'msg' => $bruh
+//     ]);
+// });
 
 //Route::get('/read_image',function(){
 
@@ -241,15 +240,15 @@ Route::post('/msg', function (Request $req) {
 //return response()->json(['url' => $url]);
 //});
 
-Route::get('/test', function () {
-    return [
-        'data' => Categorie::withCount(['posts as total_likes' => function ($query) {
-            $query->select(DB::raw('sum(likes)'));
-        }])->withSum('posts', 'views')
-            ->with(['posts' => function ($query) {
-                $query->select('id', 'title', 'category_id', DB::raw('sum(views) as total_views'))
-                    ->where('title', 'chainsaw man is awsome <3')
-                    ->with('views')->groupBy('id', 'title', 'category_id');
-            }])->select(DB::raw('min(id) as id'), 'name')->groupBy('name')->get()
-    ];
-});
+// Route::get('/test', function () {
+//     return [
+//         'data' => Categorie::withCount(['posts as total_likes' => function ($query) {
+//             $query->select(DB::raw('sum(likes)'));
+//         }])->withSum('posts', 'views')
+//             ->with(['posts' => function ($query) {
+//                 $query->select('id', 'title', 'category_id', DB::raw('sum(views) as total_views'))
+//                     ->where('title', 'chainsaw man is awsome <3')
+//                     ->with('views')->groupBy('id', 'title', 'category_id');
+//             }])->select(DB::raw('min(id) as id'), 'name')->groupBy('name')->get()
+//     ];
+// });

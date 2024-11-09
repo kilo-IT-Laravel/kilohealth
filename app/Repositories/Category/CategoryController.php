@@ -60,10 +60,10 @@ class CategoryController implements CategoryInterface
         }
     }
 
-    public function getPopularCategory(): Collection
+    public function getPopularCategory(int $limit = 10): Collection
     {
         try {
-            return categorie::withCount([
+            return categorie::select('id', 'name', 'slug', 'icon')->withCount([
                 'posts as total_views' => function ($query) {
                     $query->select(DB::raw('SUM(views)'));
                 },
@@ -72,7 +72,7 @@ class CategoryController implements CategoryInterface
                 },
             ])
             ->orderByRaw('total_views + total_likes DESC')
-            ->take(10)
+            ->take($limit)
             ->get();
         } catch (Exception $e) {
             Log::error('Database error: ' . $e->getMessage());

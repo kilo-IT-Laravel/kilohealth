@@ -12,7 +12,7 @@ interface PostInterface
     public function getAllPosts(Request $req, int $perPage): LengthAwarePaginator;
     public function getPostById(int $id): ?post;
     public function displayPostPhotosById(int $postId, int $perPage = 10): LengthAwarePaginator;
-    public function getPostByIdForPublic(int $id , int $userId): ?array;
+    public function getPostByIdForPublic(int $id , ?int $userId): ?array;
     public function createPost(Request $req): post;
     public function updatePost(int $id, Request $req): bool;
     public function deletePost(int $id): bool;

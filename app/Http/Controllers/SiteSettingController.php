@@ -7,13 +7,17 @@ use App\Http\Resources\SiteSettings\show;
 use App\pagination\paginating;
 use App\Repositories\SiteSettings\SiteSettingInterface;
 use App\Services\SiteSettingsService;
+use App\Traits\ValidationErrorFormatter;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class SiteSettingController extends Controller
 {
+    use ValidationErrorFormatter;
+
     private Request $req;
 
     protected $Repository;
@@ -35,17 +39,18 @@ class SiteSettingController extends Controller
         try {
 
             $search = $this->req->search;
+            $key = $this->req->key;
             $perPage = $this->req->per_page ?? 10;
 
-            $settings = $this->Repository->getAllSettings($search, $perPage);
+            $settings = $this->Repository->getAllSettings($search , $key, $perPage);
             return response()->json([
                 'success' => true, 
-                'message' => 'Successfully retrieving settings', 
+                'message' => 'Successfully', 
                 'data' => index::collection($settings),
                 'meta' => $this->pagination->metadata($settings)
             ], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -58,13 +63,13 @@ class SiteSettingController extends Controller
             }
             return response()->json([
                 'success' => true, 
-                'message' => 'Successfully retrieving setting', 
+                'message' => 'Successfully', 
                 'data' => new show($setting)
             ], 200);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Setting not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -80,11 +85,14 @@ class SiteSettingController extends Controller
 
             $this->Repository->updateSetting($key, $this->req);
 
-            return response()->json(['success' => true, 'message' => 'Setting updated successfully'], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+            return response()->json(['success' => false, 'message' => 'Setting not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -100,9 +108,12 @@ class SiteSettingController extends Controller
             ]);
 
             $setting = $this->Repository->createSetting($this->req);
-            return response()->json(['success' => true, 'message' => 'Successfully created setting', 'data' => $setting], 201);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'data' => $setting], 201);
+        } catch(ValidationException $e){
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response()->json(['success' => false , 'message' => 'Unsuccessfully' , 'errors' => $formattedErrors] , 422); 
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -113,9 +124,9 @@ class SiteSettingController extends Controller
             if (!$deleted) {
                 return response()->json(['message' => 'Setting not found'], 404);
             }
-            return response()->json(['success' => true, 'message' => 'Failed to delete setting'], 204);
+            return response()->json(['success' => true, 'message' => 'Successfully'], 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -123,9 +134,9 @@ class SiteSettingController extends Controller
     {
         try {
             $settings = $this->siteSettingsService->getAllSettings();
-            return response()->json(['success' => true, 'data' => $settings]);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'data' => $settings]);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -136,9 +147,9 @@ class SiteSettingController extends Controller
             if ($value === null) {
                 return response()->json(['message' => 'Setting not found'], 404);
             }
-            return response()->json(['success' => true, 'data' => [$key => $value]]);
+            return response()->json(['success' => true, 'message' => 'Successfully' , 'data' => [$key => $value]] , 200);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 }

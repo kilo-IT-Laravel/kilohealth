@@ -5,9 +5,8 @@ namespace Database\Seeders;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use GuzzleHttp\Psr7\Request;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Hash;
 
 class gen_user_roleandper extends Seeder
@@ -73,6 +72,7 @@ class gen_user_roleandper extends Seeder
                     'name' => $userData['name'],
                     'password' => Hash::make($userData['password']),
                     'role_id' => $role->id,
+                    'email_verified_at' => Date::now()
                 ]
             );
 

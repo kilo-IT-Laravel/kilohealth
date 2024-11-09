@@ -7,6 +7,7 @@ use App\Events\UserMangement\UserLoggedIn;
 use App\Events\UserMangement\UserLoggedOut;
 use App\Events\UserMangement\UserRegistered;
 use App\Models\User;
+use App\Traits\ValidationErrorFormatter;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -17,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 
 class Authentication extends Controller
 {
+    use ValidationErrorFormatter;
+
     private Request $req;
     public function __construct(Request $req)
     {
@@ -36,18 +39,18 @@ class Authentication extends Controller
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password'])
             ]);
-
+       
             $expireDate = now()->addDays(7);
             $token = $user->createToken('my_token', expiresAt: $expireDate)->plainTextToken;
 
             event(new UserRegistered($user));
-            return response()->json(['success' => true, 'message' => 'welcome new member ^w^', 'data' => $user, 'token' => $token], 201);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'token' => $token], 201);
         } catch (ValidationException $e) {
-            $customErrorMessage = 'Oops, looks like something went wrong with your submission.';
-            return response(['success' => false, 'message' => $customErrorMessage, 'issues' => $e->errors()], 422);
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response(['success' => false, 'message' => 'Unseccessfully', 'errors' => $formattedErrors], 422);
         } catch (Exception $e) {
             Log::error("error: " . $e->getMessage());
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -62,20 +65,20 @@ class Authentication extends Controller
             $user = User::where('email', $validated['email'])->first();
 
             if (!$user || !Hash::check($validated['password'], $user->password)) {
-                return response(['success' => false, 'message' => "incorrect credential! >w<"]);
+                return response(['success' => false, 'message' => "Invalid email or password"], 422);
             }
 
             $expireDate = now()->addDays(7);
             $token = $user->createToken('my_token', expiresAt: $expireDate)->plainTextToken;
 
             event(new UserLoggedIn($user));
-            return response()->json(['success' => true, 'message' => 'welcome back master :3', 'data' => $user, 'token' => $token], 200);
+            return response()->json(['success' => true, 'message' => 'Successfully', 'token' => $token], 200);
         } catch (ValidationException $e) {
-            $customErrorMessage = 'oops look likes something wrong with your submission';
-            return response(['success' => false, 'message' => $customErrorMessage, 'issues' => $e->errors()], 422);
+            $formattedErrors = $this->formatValidationError($e->errors());
+            return response(['success' => false, 'message' => 'Unseccessfully', 'errors' => $formattedErrors], 422);
         } catch (Exception $e) {
             Log("error: ", $e->getMessage());
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 
@@ -94,14 +97,14 @@ class Authentication extends Controller
         try {
             return response()->json([
                 'success' => true,
-                'message' => 'Users retrieved successfully',
+                'message' => 'Successfully',
                 'data' => $this->req->user()
             ], 200);
         } catch (ModelNotFoundException $e) {
             Log::error('User not found: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'User not found'], 404);
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Internal server errors'], 500);
         }
     }
 }

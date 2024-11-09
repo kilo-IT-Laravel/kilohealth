@@ -27,14 +27,14 @@ class AnalyticsController extends Controller
             ];
 
             return response()->json([
-                'status' => 'success',
+                'success' => true,
+                'message' => 'Successfully',
                 'data' => $data
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'An error occurred while fetching analytics data.',
-                'error' => $e->getMessage()
+                'Success' => false,
+                'message' => 'Internal server errors',
             ], 500);
         }
     }

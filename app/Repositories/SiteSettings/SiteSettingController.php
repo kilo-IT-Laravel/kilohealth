@@ -23,12 +23,16 @@ class SiteSettingController implements SiteSettingInterface
         $this->logService = $logService;
     }
 
-    public function getAllSettings(string $search = null, int $perPage = 10): LengthAwarePaginator
+    public function getAllSettings(string $search = null , string $key = null , int $perPage = 10): LengthAwarePaginator
     {
         try {
             $query = site_setting::query()
                 ->when($search, function ($query, $search) {
-                    return $query->where('name', 'LIKE', "%{$search}%");
+                    return $query->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('key' , 'LIKE', "%{$search}%");
+                })
+                ->when($key, function ($query , $key){
+                    return $query->where('key' , 'LIKE' , "%{$key}%");
                 })->orderBy('created_at', 'desc');
             return $query->latest()->paginate($perPage);
         } catch (Exception $e) {

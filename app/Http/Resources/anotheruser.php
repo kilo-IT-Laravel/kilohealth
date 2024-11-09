@@ -21,7 +21,7 @@ class anotheruser extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'avatar' => $this->avatar ? $this->getThisUrl($this->avatar) : "https://pbs.twimg.com/media/Fl14K6KaAAQ_OgI?format=jpg&name=large",
+            'avatar' => $this->avatar ? $this->getThisUrl($this->avatar) : "https://as2.ftcdn.net/v2/jpg/00/64/67/27/1000_F_64672736_U5kpdGs9keUll8CRQ3p3YaEv2M6qkVY5.jpg",
             'role_id' => $this->role->id,
             'role_name' => $this->role->name
         ];

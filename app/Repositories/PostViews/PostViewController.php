@@ -21,37 +21,6 @@ class PostViewController implements PostViewInterface
         $this->logService = $logService;
     }
 
-    public function recordView(int $postId, int $userId): post_view
-    {
-        try {
-            return DB::transaction(function () use ($postId, $userId) {
-                $post = post::findOrFail($postId);
-
-                $postView = post_view::firstOrCreate([
-                    'post_id' => $postId,
-                    'user_id' => $userId,
-                ]);
-
-                if ($postView->wasRecentlyCreated) {
-                    $post->increment('views');
-                    $this->logService->log($userId, 'recorded_post_view', post_view::class, $postView->id, json_encode([
-                        'post_id' => $postId,
-                        'user_id' => $userId,
-                        'viewed_at' => now(),
-                    ]));
-                }
-
-                $postView->viewed_at = now();
-                $postView->save();
-                event(new PostViewed($post, $userId));
-                return $postView;
-            });
-        } catch (Exception $e) {
-            Log::error('Error recording post view: ' . $e->getMessage());
-            throw new Exception('Error recording post view');
-        }
-    }
-
     public function getViewCount(int $postId): int
     {
         try {
